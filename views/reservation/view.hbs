@@ -1,0 +1,116 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1>Reservation Details</h1>
+    <p class="text-muted">View reservation information</p>
+  </div>
+  <div>
+    <a href="/reservation/my" class="btn btn-secondary">Back to My Reservations</a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Reservation Information</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Lab Details</h6>
+            <p><strong>Lab:</strong> {{reservation.lab.name}}</p>
+            <p><strong>Description:</strong> {{reservation.lab.description}}</p>
+            <p><strong>Seat Number:</strong> {{reservation.seatNumber}}</p>
+          </div>
+          <div class="col-md-6">
+            <h6>Reservation Details</h6>
+            <p><strong>Date:</strong> {{formatDate reservation.startTime}}</p>
+            <p><strong>Start Time:</strong> {{formatTime reservation.startTime}}</p>
+            <p><strong>End Time:</strong> {{formatTime reservation.endTime}}</p>
+            <p><strong>Duration:</strong> 30 minutes</p>
+          </div>
+        </div>
+        
+        <hr>
+        
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Student Information</h6>
+            {{#if reservation.isAnonymous}}
+              <p><strong>Student:</strong> <span class="text-muted">Anonymous</span></p>
+            {{else}}
+              <p><strong>Student:</strong> {{reservation.user.email}}</p>
+              <p><strong>Description:</strong> {{reservation.user.description}}</p>
+            {{/if}}
+          </div>
+          <div class="col-md-6">
+            <h6>Status</h6>
+            <p><strong>Anonymous:</strong> 
+              {{#if reservation.isAnonymous}}
+                <span class="badge bg-warning">Yes</span>
+              {{else}}
+                <span class="badge bg-info">No</span>
+              {{/if}}
+            </p>
+            <p><strong>Created:</strong> {{formatDateTime reservation.createdAt}}</p>
+            <p><strong>Updated:</strong> {{formatDateTime reservation.updatedAt}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Actions</h5>
+      </div>
+      <div class="card-body">
+        {{#if user}}
+          {{#if (eq user.role 'student')}}
+            {{#if (eq reservation.user._id user.id)}}
+              <a href="/reservation/edit/{{reservation._id}}" class="btn btn-primary w-100 mb-2">Edit Reservation</a>
+              <button class="btn btn-danger w-100" onclick="cancelReservation('{{reservation._id}}')">Cancel Reservation</button>
+            {{/if}}
+          {{else}}
+            <a href="/reservation/edit/{{reservation._id}}" class="btn btn-primary w-100 mb-2">Edit Reservation</a>
+            <button class="btn btn-danger w-100" onclick="removeReservation('{{reservation._id}}')">Remove Reservation</button>
+          {{/if}}
+        {{/if}}
+      </div>
+    </div>
+    
+    <div class="card mt-3">
+      <div class="card-header">
+        <h5 class="mb-0">Lab Information</h5>
+      </div>
+      <div class="card-body">
+        <p><strong>Total Seats:</strong> {{reservation.lab.seats.length}}</p>
+        <p><strong>Available Seats:</strong> <span id="availableSeats">Loading...</span></p>
+        <a href="/lab/availability/{{reservation.lab._id}}" class="btn btn-secondary w-100">View Lab Availability</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function cancelReservation(reservationId) {
+  if (confirm('Are you sure you want to cancel this reservation?')) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/reservation/delete/${reservationId}`;
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+
+function removeReservation(reservationId) {
+  if (confirm('Are you sure you want to remove this reservation? This action can only be performed within 10 minutes of the reservation time.')) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/reservation/remove/${reservationId}`;
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+</script>

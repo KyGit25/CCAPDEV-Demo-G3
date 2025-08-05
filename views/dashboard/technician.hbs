@@ -1,0 +1,51 @@
+{{#extend "title"}}Technician Dashboard{{/extend}}
+{{#extend "scripts"}}technician{{/extend}}
+
+<div class="main-container">
+  <h2 class="mb-3">Technician Tools</h2>
+
+  <div class="mb-4">
+    <button class="btn btn-primary" onclick="reserveForWalkIn()">Reserve for Walk-In Student</button>
+  </div>
+
+  <h4>Manage Reservations</h4>
+  <table class="table table-bordered mt-3">
+    <thead class="table-light">
+      <tr>
+        <th>Student</th>
+        <th>Lab</th>
+        <th>Seat</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each reservations}}
+        <tr>
+          <td>
+            {{#if this.isAnonymous}}
+              Anonymous
+            {{else}}
+              <a href="/profile/{{this.user._id}}">{{this.user.name}}</a>
+            {{/if}}
+          </td>
+          <td>{{this.lab.name}}</td>
+          <td>{{this.seatNumber}}</td>
+          <td>{{formatDate this.date}}</td>
+          <td>{{this.startTime}} - {{this.endTime}}</td>
+          <td>
+            <a href="/reservation/{{this._id}}/edit" class="btn btn-sm btn-warning">Edit</a>
+            <form action="/reservation/{{this._id}}?_method=DELETE" method="POST" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
+            </form>
+          </td>
+        </tr>
+      {{else}}
+        <tr>
+          <td colspan="6" class="text-center">No reservations to manage</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>

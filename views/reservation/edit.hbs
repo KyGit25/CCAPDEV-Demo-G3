@@ -1,0 +1,48 @@
+
+<div class="main-container">
+  <h2 class="text-center mb-4">Edit Reservation</h2>
+
+  <form id="editReservationForm" action="/reservation/edit/{{reservation._id}}" method="POST">
+    <div class="mb-3">
+      <label class="form-label">Lab</label>
+      <select class="form-select" name="lab" required>
+        {{#each labs}}
+          <option value="{{this._id}}" {{#eq this._id ../reservation.lab._id}}selected{{/eq}}>
+            Lab {{this.name}} (Capacity: {{this.capacity}})
+          </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Seat Number</label>
+      <input type="number" class="form-control" name="seatNumber" 
+             value="{{reservation.seatNumber}}" min="1" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Start Time</label>
+      <input type="datetime-local" class="form-control" name="startTime" required
+             value="{{reservation.startTimeISO}}">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">End Time</label>
+      <input type="datetime-local" class="form-control" name="endTime" readonly
+             value="{{reservation.endTimeISO}}">
+    </div>
+
+    {{#if (eq user.userType 'student')}}
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="isAnonymous" 
+               id="anonymous" {{#if reservation.isAnonymous}}checked{{/if}}>
+        <label class="form-check-label" for="anonymous">Reserve Anonymously</label>
+      </div>
+    {{/if}}
+
+    <div class="d-grid gap-2">
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+      <a href="/dashboard" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>

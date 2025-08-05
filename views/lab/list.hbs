@@ -1,0 +1,46 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1>Computer Labs</h1>
+    <p class="text-muted">Select a lab to view availability and make reservations</p>
+  </div>
+  <div>
+    <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+  </div>
+</div>
+
+<div class="lab-grid">
+  {{#each labs}}
+    <div class="lab-card">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <h3>{{this.name}}</h3>
+          <p class="text-muted mb-2">{{this.description}}</p>
+          <div class="d-flex align-items-center">
+            <span class="badge bg-success me-2">{{this.seats.length}} seats</span>
+            <small class="text-muted">Available for reservation</small>
+          </div>
+        </div>
+      </div>
+      
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="btn-group" role="group">
+          <a href="/lab/{{this._id}}/availability" class="btn btn-primary">View Availability</a>
+          {{#if ../user}}
+            {{#if (eq ../user.role 'student')}}
+              <a href="/reservation/reserve/{{this._id}}" class="btn btn-secondary">Reserve Now</a>
+            {{/if}}
+          {{/if}}
+        </div>
+        
+        <div class="text-end">
+          <small class="text-muted">Last updated: {{formatDate this.updatedAt}}</small>
+        </div>
+      </div>
+    </div>
+  {{else}}
+    <div class="text-center py-5">
+      <h3 class="text-muted">No labs available</h3>
+      <p class="text-muted">Please contact the administrator to set up labs.</p>
+    </div>
+  {{/each}}
+</div>

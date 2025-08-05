@@ -1,0 +1,101 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1>Search Available Slots</h1>
+    <p class="text-muted">Find available lab seats for your desired time</p>
+  </div>
+  <div>
+    <a href="/lab/list" class="btn btn-secondary">Browse Labs</a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Search Filters</h5>
+      </div>
+      <div class="card-body">
+        <form action="/search/slots" method="GET">
+          <div class="mb-3">
+            <label for="labId" class="form-label">Lab</label>
+            <select class="form-control" name="labId" required>
+              <option value="">Select a lab</option>
+              {{#each labs}}
+                <option value="{{this._id}}" {{#if (eq this._id ../labId)}}selected{{/if}}>
+                  {{this.name}}
+                </option>
+              {{/each}}
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="date" class="form-label">Date</label>
+            <input type="date" class="form-control" name="date" value="{{date}}" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="time" class="form-label">Time</label>
+            <input type="time" class="form-control" name="time" value="{{time}}" required>
+          </div>
+          
+          <button type="submit" class="btn btn-primary w-100">Search Available Slots</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-8">
+    {{#if searchPerformed}}
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Search Results</h5>
+          <small class="text-muted">{{lab.name}} on {{date}} at {{time}}</small>
+        </div>
+        <div class="card-body">
+          {{#if availableSeats}}
+            <p class="mb-3">
+              <strong>{{availableSeats.length}} seat(s) available</strong> out of {{lab.seats.length}} total seats
+            </p>
+            
+            <div class="row">
+              {{#each availableSeats}}
+                <div class="col-md-3 mb-3">
+                  <div class="card border-success">
+                    <div class="card-body text-center">
+                      <h6>Seat {{this}}</h6>
+                      <span class="badge bg-success mb-2">Available</span>
+                      {{#if ../user}}
+                        {{#if (eq ../user.role 'student')}}
+                          <form action="/reservation/reserve" method="POST">
+                            <input type="hidden" name="labId" value="{{../lab._id}}">
+                            <input type="hidden" name="selectedDate" value="{{../date}}">
+                            <input type="hidden" name="selectedTime" value="{{../time}}">
+                            <input type="hidden" name="selectedSeats" value="{{this}}">
+                            <button type="submit" class="btn btn-sm btn-primary">Reserve</button>
+                          </form>
+                        {{/if}}
+                      {{/if}}
+                    </div>
+                  </div>
+                </div>
+              {{/each}}
+            </div>
+          {{else}}
+            <div class="text-center py-4">
+              <h5 class="text-muted">No Available Seats</h5>
+              <p class="text-muted">All seats are reserved for the selected time slot.</p>
+              <a href="/lab/availability/{{lab._id}}" class="btn btn-primary">View Full Availability</a>
+            </div>
+          {{/if}}
+        </div>
+      </div>
+    {{else}}
+      <div class="card">
+        <div class="card-body text-center py-5">
+          <h5 class="text-muted">Enter Search Criteria</h5>
+          <p class="text-muted">Select a lab, date, and time to search for available seats.</p>
+        </div>
+      </div>
+    {{/if}}
+  </div>
+</div>

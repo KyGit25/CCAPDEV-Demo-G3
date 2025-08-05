@@ -1,0 +1,86 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1>Search Users</h1>
+    <p class="text-muted">Find users by email address</p>
+  </div>
+  <div>
+    <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Search</h5>
+      </div>
+      <div class="card-body">
+        <form action="/search/users" method="GET">
+          <div class="mb-3">
+            <label for="query" class="form-label">Email or Name</label>
+            <input type="text" class="form-control" name="query" id="query" 
+                   value="{{query}}" placeholder="Enter email or name...">
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Search Users</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-8">
+    {{#if query}}
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Search Results</h5>
+          <small class="text-muted">Results for "{{query}}"</small>
+        </div>
+        <div class="card-body">
+          {{#if users}}
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Description</th>
+                    <th>Member Since</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{#each users}}
+                    <tr>
+                      <td>{{this.email}}</td>
+                      <td>
+                        <span class="badge bg-{{#if (eq this.role 'student')}}primary{{else}}warning{{/if}}">
+                          {{this.role}}
+                        </span>
+                      </td>
+                      <td>{{this.description}}</td>
+                      <td>{{formatDate this.createdAt}}</td>
+                      <td>
+                        <a href="/profile/view/{{this._id}}" class="btn btn-sm btn-primary">View Profile</a>
+                      </td>
+                    </tr>
+                  {{/each}}
+                </tbody>
+              </table>
+            </div>
+          {{else}}
+            <div class="text-center py-4">
+              <h5 class="text-muted">No Users Found</h5>
+              <p class="text-muted">No users match your search criteria.</p>
+            </div>
+          {{/if}}
+        </div>
+      </div>
+    {{else}}
+      <div class="card">
+        <div class="card-body text-center py-5">
+          <h5 class="text-muted">Enter Search Query</h5>
+          <p class="text-muted">Enter an email or name to search for users.</p>
+        </div>
+      </div>
+    {{/if}}
+  </div>
+</div>

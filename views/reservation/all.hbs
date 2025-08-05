@@ -1,0 +1,100 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1>All Reservations</h1>
+    <p class="text-muted">Manage all student reservations</p>
+  </div>
+  <div>
+    <a href="/lab/list" class="btn btn-primary">New Reservation</a>
+  </div>
+</div>
+
+{{#if success}}
+  <div class="alert alert-success">{{success}}</div>
+{{/if}}
+
+{{#if reservations}}
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">All Reservations</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Lab</th>
+              <th>Seat</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Status</th>
+              <th>Anonymous</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each reservations}}
+              <tr>
+                <td>
+                  {{#if this.isAnonymous}}
+                    <span class="text-muted">Anonymous</span>
+                  {{else}}
+                    <a href="/profile/view/{{this.user._id}}">{{this.user.email}}</a>
+                  {{/if}}
+                </td>
+                <td>{{this.lab.name}}</td>
+                <td>{{this.seatNumber}}</td>
+                <td>{{formatDate this.startTime}}</td>
+                <td>{{formatTime this.startTime}} - {{formatTime this.endTime}}</td>
+                <td>
+                  {{#if this.isPast}}
+                    <span class="badge bg-secondary">Completed</span>
+                  {{else}}
+                    <span class="badge bg-success">Upcoming</span>
+                  {{/if}}
+                </td>
+                <td>
+                  {{#if this.isAnonymous}}
+                    <span class="badge bg-warning">Yes</span>
+                  {{else}}
+                    <span class="badge bg-info">No</span>
+                  {{/if}}
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a href="/reservation/view/{{this._id}}" class="btn btn-primary">View</a>
+                    {{#unless this.isPast}}
+                      <a href="/reservation/edit/{{this._id}}" class="btn btn-secondary">Edit</a>
+                      <button class="btn btn-danger" onclick="removeReservation('{{this._id}}')">Remove</button>
+                    {{/unless}}
+                  </div>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{{else}}
+  <div class="text-center py-5">
+    <div class="card">
+      <div class="card-body">
+        <h3 class="text-muted mb-3">No Reservations Found</h3>
+        <p class="text-muted">No reservations have been made yet.</p>
+      </div>
+    </div>
+  </div>
+{{/if}}
+
+<script>
+function removeReservation(reservationId) {
+  if (confirm('Are you sure you want to remove this reservation? This action can only be performed within 10 minutes of the reservation time.')) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/reservation/remove/${reservationId}`;
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+</script>

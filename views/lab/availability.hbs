@@ -1,0 +1,285 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1>{{lab.name}}</h1>
+    <p class="text-muted">{{lab.description}}</p>
+  </div>
+  <div>
+    <a href="/lab/list" class="btn btn-secondary">Back to Labs</a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Select Date & Time</h5>
+      </div>
+      <div class="card-body">
+        <form id="dateTimeForm">
+          <div class="mb-3">
+            <label for="selectedDate" class="form-label">Date</label>
+            <input type="date" class="form-control" id="selectedDate" name="selectedDate" 
+                   min="{{today}}" max="{{maxDate}}" value="{{selectedDate}}" required>
+          </div>
+          <div class="mb-3">
+            <label for="selectedTime" class="form-label">Time Slot</label>
+            <select class="form-control" id="selectedTime" name="selectedTime" required>
+              <option value="">Select time slot</option>
+              {{#each timeSlots}}
+                <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>
+                  {{this.label}}
+                </option>
+              {{/each}}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Update View</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Seat Availability</h5>
+        <small class="text-muted">{{formatDate selectedDate}} at {{selectedTimeLabel}}</small>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <div class="d-flex gap-3 align-items-center">
+              <div class="d-flex align-items-center">
+                <div class="seat available" style="width: 20px; height: 20px; margin-right: 5px;"></div>
+                <small>Available</small>
+              </div>
+              <div class="d-flex align-items-center">
+                <div class="seat occupied" style="width: 20px; height: 20px; margin-right: 5px;"></div>
+                <small>Occupied</small>
+              </div>
+              <div class="d-flex align-items-center">
+                <div class="seat selected" style="width: 20px; height: 20px; margin-right: 5px;"></div>
+                <small>Selected</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="seat-grid">
+          {{#each seats}}
+            <div class="seat {{this.status}}" data-seat="{{this.number}}" 
+                 {{#if this.available}}onclick="selectSeat({{this.number}})"{{/if}}>
+              {{this.number}}
+              {{#if this.details}}
+                <div class="seat-tooltip">
+                  {{#if this.details.anonymous}}
+                    Reserved by: Anonymous
+                  {{else}}
+                    Reserved by: <a href="/profile/view/{{this.details.userId}}" style="color: #7ed957; text-decoration: underline;">{{this.details.reservedBy}}</a>
+                  {{/if}}
+                </div>
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
+        
+        {{#if user}}
+          {{#if (eq user.role 'student')}}
+            <div class="mt-4">
+              <form action="/reservation/reserve" method="POST" id="reservationForm">
+                <input type="hidden" name="labId" value="{{lab._id}}">
+                <input type="hidden" name="selectedDate" value="{{selectedDate}}">
+                <input type="hidden" name="selectedTime" value="{{selectedTime}}">
+                <input type="hidden" name="selectedSeats" id="selectedSeats" value="">
+                
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="isAnonymous" name="isAnonymous">
+                    <label class="form-check-label" for="isAnonymous">
+                      Reserve anonymously
+                    </label>
+                  </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="reserveBtn" disabled>
+                  Reserve Selected Seats
+                </button>
+              </form>
+            </div>
+          {{/if}}
+          
+          {{#if (eq user.role 'technician')}}
+            <div class="mt-4">
+              <form action="/reservation/reserve-for-student" method="POST" id="techReservationForm">
+                <input type="hidden" name="labId" value="{{lab._id}}">
+                <input type="hidden" name="selectedDate" value="{{selectedDate}}">
+                <input type="hidden" name="selectedTime" value="{{selectedTime}}">
+                <input type="hidden" name="selectedSeats" id="techSelectedSeats" value="">
+                
+                <div class="mb-3">
+                  <label for="studentEmail" class="form-label">Student Email</label>
+                  <input type="email" class="form-control" id="studentEmail" name="studentEmail" 
+                         placeholder="Enter student email" required>
+                </div>
+                
+                <button type="submit" class="btn btn-success" id="techReserveBtn" disabled>
+                  Reserve for Student
+                </button>
+              </form>
+            </div>
+          {{/if}}
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedSeats = [];
+
+function selectSeat(seatNumber) {
+  const seatElement = document.querySelector(`[data-seat="${seatNumber}"]`);
+  if (seatElement.classList.contains('selected')) {
+    seatElement.classList.remove('selected');
+    seatElement.classList.add('available');
+    selectedSeats = selectedSeats.filter(seat => seat !== seatNumber);
+  } else {
+    seatElement.classList.remove('available');
+    seatElement.classList.add('selected');
+    selectedSeats.push(seatNumber);
+  }
+  
+  updateReservationButtons();
+}
+
+function updateReservationButtons() {
+  // Update student form
+  const studentSeatsInput = document.getElementById('selectedSeats');
+  const studentReserveBtn = document.getElementById('reserveBtn');
+  if (studentSeatsInput && studentReserveBtn) {
+    studentSeatsInput.value = selectedSeats.join(',');
+    studentReserveBtn.disabled = selectedSeats.length === 0;
+  }
+  
+  // Update technician form
+  const techSeatsInput = document.getElementById('techSelectedSeats');
+  const techReserveBtn = document.getElementById('techReserveBtn');
+  if (techSeatsInput && techReserveBtn) {
+    techSeatsInput.value = selectedSeats.join(',');
+    const studentEmail = document.getElementById('studentEmail');
+    techReserveBtn.disabled = selectedSeats.length === 0 || (studentEmail && !studentEmail.value.trim());
+  }
+}
+
+// Update technician button when email is entered
+document.addEventListener('DOMContentLoaded', function() {
+  const studentEmailInput = document.getElementById('studentEmail');
+  if (studentEmailInput) {
+    studentEmailInput.addEventListener('input', updateReservationButtons);
+  }
+});
+
+document.getElementById('dateTimeForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const date = document.getElementById('selectedDate').value;
+  const time = document.getElementById('selectedTime').value;
+  window.location.href = `/lab/{{lab._id}}/availability?date=${date}&time=${time}`;
+});
+
+// Handle technician form submission
+const techForm = document.getElementById('techReservationForm');
+if (techForm) {
+  techForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = document.getElementById('techReserveBtn');
+    
+    // Disable button to prevent double submission
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processing...';
+    
+    // Convert FormData to JSON
+    const jsonData = {};
+    for (let [key, value] of formData.entries()) {
+      jsonData[key] = value;
+    }
+    
+    fetch('/reservation/reserve-for-student', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(jsonData)
+    })
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        return response.json().then(data => Promise.reject(data));
+      }
+    })
+    .then(data => {
+      if (data.success) {
+        // Redirect to the success URL
+        window.location.href = data.redirectUrl;
+      } else {
+        throw new Error(data.message || 'Unknown error');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert(error.error || error.message || 'Failed to create reservation');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Reserve for Student';
+    });
+  });
+}
+
+// Handle student form submission
+const studentForm = document.getElementById('reservationForm');
+if (studentForm) {
+  studentForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = document.getElementById('reserveBtn');
+    
+    // Disable button to prevent double submission
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processing...';
+    
+    fetch('/reservation/reserve', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (response.ok) {
+        window.location.href = '/reservation/my?success=Reservation created successfully';
+      } else {
+        return response.json().then(data => Promise.reject(data));
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert(error.error || 'Failed to create reservation');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Reserve Selected Seats';
+    });
+  });
+}
+
+// Add periodic refresh for real-time updates (reduced frequency to avoid performance issues)
+let refreshInterval = setInterval(function() {
+  const currentDate = document.getElementById('selectedDate').value;
+  const currentTime = document.getElementById('selectedTime').value;
+  if (currentDate && currentTime && selectedSeats.length === 0) {
+    // Only refresh if no seats are currently selected
+    window.location.href = `/lab/{{lab._id}}/availability?date=${currentDate}&time=${currentTime}`;
+  }
+}, 60000); // Refresh every minute instead of 30 seconds
+
+// Clear interval when page is about to unload
+window.addEventListener('beforeunload', function() {
+  clearInterval(refreshInterval);
+});
+</script>

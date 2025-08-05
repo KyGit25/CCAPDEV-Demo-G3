@@ -1,0 +1,39 @@
+{{#extend "title"}}Lab Availability{{/extend}}
+{{#extend "scripts"}}view_lab{{/extend}}
+
+<div class="main-container">
+  <h2 class="text-center mb-4">Lab Seat Availability</h2>
+
+  <div class="mb-3">
+    <label for="labSelect" class="form-label">Choose a lab:</label>
+    <select id="labSelect" class="form-select">
+      {{#each labs}}
+        <option value="{{this._id}}">{{this.name}}</option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="row row-cols-2 row-cols-md-4 g-3">
+    {{#each seats}}
+      <div class="col">
+        <div class="card h-100 {{#if this.isAvailable}}bg-success text-white{{else}}bg-secondary{{/if}}">
+          <div class="card-body text-center">
+            <h5 class="card-title">Seat {{this.number}}</h5>
+            {{#unless this.isAvailable}}
+              <p class="card-text small">
+                {{#if this.reservation.isAnonymous}}
+                  Reserved
+                {{else}}
+                  {{this.reservation.user.name}}
+                {{/if}}
+              </p>
+            {{/unless}}
+            {{#if this.isAvailable}}
+              <button class="btn btn-light btn-sm reserve-btn" data-seat="{{this.number}}">Reserve</button>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</div>

@@ -1,0 +1,121 @@
+{{#if user}}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="mb-0">Welcome, {{user.role}}!</h1>
+      <p class="text-muted">DLSU Lab Reservation System</p>
+    </div>
+    <div>
+      <a href="/profile/view" class="btn btn-secondary">My Profile</a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Quick Actions</h5>
+        </div>
+        <div class="card-body">
+          {{#if (eq user.role 'student')}}
+            <a href="/lab/list" class="btn btn-primary w-100 mb-2">View Labs</a>
+            <a href="/search/slots" class="btn btn-primary w-100 mb-2">Search Slots</a>
+            <a href="/reservation/my" class="btn btn-secondary w-100 mb-2">My Reservations</a>
+          {{else}}
+            <a href="/lab/list" class="btn btn-primary w-100 mb-2">Manage Labs</a>
+            <a href="/reservation/all" class="btn btn-primary w-100 mb-2">All Reservations</a>
+            <a href="/search/slots" class="btn btn-secondary w-100 mb-2">Search Slots</a>
+            <a href="/search/users" class="btn btn-info w-100 mb-2">Search Users</a>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Available Labs</h5>
+        </div>
+        <div class="card-body">
+          <div class="lab-grid">
+            {{#each labs}}
+              <div class="lab-card">
+                <h6>{{this.name}}</h6>
+                <p>{{this.description}}</p>
+                <p class="text-muted">{{this.seats.length}} seats available</p>
+                <a href="/lab/{{this._id}}/availability" class="btn btn-primary btn-sm">View Availability</a>
+              </div>
+            {{else}}
+              <p class="text-muted">No labs available</p>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{#if (eq user.role 'student')}}
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">My Recent Reservations</h5>
+          </div>
+          <div class="card-body">
+            {{#if reservations}}
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Lab</th>
+                      <th>Seat</th>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {{#each reservations}}
+                      <tr>
+                        <td>{{this.lab.name}}</td>
+                        <td>{{this.seatNumber}}</td>
+                        <td>{{formatDate this.startTime}}</td>
+                        <td>{{formatTime this.startTime}} - {{formatTime this.endTime}}</td>
+                        <td>
+                          <span class="badge bg-{{#if this.isActive}}success{{else}}secondary{{/if}}">
+                            {{#if this.isActive}}Active{{else}}Completed{{/if}}
+                          </span>
+                        </td>
+                        <td>
+                          <a href="/reservation/view/{{this._id}}" class="btn btn-sm btn-primary">View</a>
+                          {{#if this.isActive}}
+                            <a href="/reservation/edit/{{this._id}}" class="btn btn-sm btn-secondary">Edit</a>
+                          {{/if}}
+                        </td>
+                      </tr>
+                    {{/each}}
+                  </tbody>
+                </table>
+              </div>
+              <div class="text-center mt-3">
+                <a href="/reservation/my" class="btn btn-primary">View All Reservations</a>
+              </div>
+            {{else}}
+              <p class="text-muted">No recent reservations</p>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+    </div>
+  {{/if}}
+
+{{else}}
+  <div class="text-center">
+    <h1 class="mb-4">Welcome to DLSU Lab Reservation System</h1>
+    <p class="lead mb-4">Reserve computer lab seats easily and efficiently</p>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="/auth/login" class="btn btn-primary">Login</a>
+      <a href="/auth/register" class="btn btn-secondary">Register</a>
+    </div>
+  </div>
+{{/if}}

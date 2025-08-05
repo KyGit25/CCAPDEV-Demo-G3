@@ -1,0 +1,34 @@
+<nav>
+  <div class="brand-container">
+    <a href="/" class="home-button">
+      <img src="/assets/logo.png" width="35px" alt="DLSU Logo">
+    </a>
+    <h5 class="brand-title">DLSU Lab Reservation Portal</h5>
+  </div>
+
+  <div class="link-container">
+    {{#if user}}
+      {{#if (eq user.role 'student')}}
+        <a class="link" href="/lab/list">Labs</a>
+        <a class="link" href="/search/slots">Search</a>
+        <a class="link" href="/reservation/my">My Reservations</a>
+      {{else}}
+        <a class="link" href="/lab/list">Manage Labs</a>
+        <a class="link" href="/reservation/all">All Reservations</a>
+        <a class="link" href="/search/slots">Search</a>
+      {{/if}}
+      
+      <div class="nav-ellipsis-menu">
+        <div class="dots">⋮</div>
+        <div class="dropdown-menu">
+          <a href="/profile/view">My Profile</a>
+          <a href="/auth/logout">Logout</a>
+        </div>
+      </div>
+    {{else}}
+      <a class="link" href="#">About</a>
+      <a class="link" href="/auth/register">Register</a>
+      <a class="btn-link" href="/auth/login">Login</a>
+    {{/if}}
+  </div>
+</nav>

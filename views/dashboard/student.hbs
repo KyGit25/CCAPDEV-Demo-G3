@@ -1,0 +1,46 @@
+{{#extend "title"}}Student Dashboard{{/extend}}
+{{#extend "scripts"}}dashboard{{/extend}}
+
+<div class="container mt-4">
+  <h2>Welcome, {{user.name}}!</h2>
+
+  <div class="mb-4">
+    <a href="/reservation/reserve" class="btn btn-primary"><b>Reserve a Slot</b></a>
+    <a href="/reservation/view_lab" class="btn btn-secondary"><b>View Lab Availability</b></a>
+  </div>
+
+  <h4>Your Reservations</h4>
+  <table class="table table-bordered mt-3">
+    <thead class="table-light">
+      <tr>
+        <th>Lab</th>
+        <th>Seat</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Anonymous</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each reservations}}
+        <tr>
+          <td>{{this.lab.name}}</td>
+          <td>{{this.seatNumber}}</td>
+          <td>{{formatDate this.date}}</td>
+          <td>{{this.startTime}} - {{this.endTime}}</td>
+          <td>{{#if this.isAnonymous}}Yes{{else}}No{{/if}}</td>
+          <td>
+            <a href="/reservation/{{this._id}}/edit" class="btn btn-sm btn-warning">Edit</a>
+            <form action="/reservation/{{this._id}}?_method=DELETE" method="POST" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
+            </form>
+          </td>
+        </tr>
+      {{else}}
+        <tr>
+          <td colspan="6" class="text-center">No reservations yet</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
